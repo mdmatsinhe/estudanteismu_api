@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="comprovativo_inscricao" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isIgnorePagination="true" uuid="640cb41d-2db1-471b-8df7-c2c73afdb61c">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="237"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="ismu"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="PAR_ESTID" class="java.lang.Long">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="PAR_LOGO" class="java.lang.String" isForPrompting="false"/>
+	<parameter name="PAR_ANOL" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="PAR_SEM" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String">
+		<defaultValueExpression><![CDATA["C:\\Development Environment\\workspace\\sgu\\src\\main\\webapp\\reports\\"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="PAR_OPERADOR" class="java.lang.String"/>
+	<parameter name="entidade" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+     inscricao.`estudante_id` AS inscricao_estudante_id,
+     estudante.`apelido` AS estudante_apelido,
+     estudante.`nome` AS estudante_nome,
+     estudante.`numero` AS estudante_numero,
+      estudante.`email` AS estudante_email,
+     inscricao.`ano_lectivo` AS inscricao_anoLectivo,
+     inscricao.`semestre` AS inscricao_semestre,
+     planoestudos.`cargaHoraria` AS planoestudos_cargaHoraria,
+     planoestudos.`semestre_id` AS planoestudos_semestre_id,
+     planoestudos.`anocurso_id` AS planoestudos_anocurso_id,
+     disciplina.`nome` AS disciplina_nome,
+     curso.`nome` AS curso_nome,
+     turma.`nome` AS turma_nome,
+     case when fds=true then 'SIM' else 'NÃO' end as fds 
+FROM
+     `estudante` estudante INNER JOIN `inscricao` inscricao ON estudante.`id` = inscricao.`estudante_id`
+     INNER JOIN `planoestudos` planoestudos ON inscricao.`disciplina_semestre_id` = planoestudos.`id`
+     INNER JOIN `sessaoturma` sessaoturma ON inscricao.`turma_id` = sessaoturma.`id`
+       INNER JOIN `turma` turma ON turma.`id` = sessaoturma.`turma_id`
+     INNER JOIN `curriculo` curriculo ON sessaoturma.`curriculo_id` = curriculo.`id`
+     INNER JOIN `curso` curso ON estudante.`curso_id` = curso.`id`
+     INNER JOIN `disciplina` disciplina ON planoestudos.`disciplina_id` = disciplina.`id`
+WHERE
+     inscricao.`estudante_id` = $P{PAR_ESTID}
+ AND inscricao.`ano_lectivo` = $P{PAR_ANOL}
+ AND inscricao.`semestre` = $P{PAR_SEM}]]>
+	</queryString>
+	<field name="inscricao_estudante_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="estudante_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="inscricao_estudante_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inscricao"/>
+	</field>
+	<field name="estudante_apelido" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="apelido"/>
+		<property name="com.jaspersoft.studio.field.label" value="estudante_apelido"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="estudante_nome" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="estudante_nome"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="estudante_numero" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="numero"/>
+		<property name="com.jaspersoft.studio.field.label" value="estudante_numero"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="estudante_email" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="email"/>
+		<property name="com.jaspersoft.studio.field.label" value="estudante_email"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="inscricao_anoLectivo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="ano_lectivo"/>
+		<property name="com.jaspersoft.studio.field.label" value="inscricao_anoLectivo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inscricao"/>
+	</field>
+	<field name="inscricao_semestre" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="semestre"/>
+		<property name="com.jaspersoft.studio.field.label" value="inscricao_semestre"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inscricao"/>
+	</field>
+	<field name="planoestudos_cargaHoraria" class="java.lang.Double">
+		<property name="com.jaspersoft.studio.field.name" value="cargaHoraria"/>
+		<property name="com.jaspersoft.studio.field.label" value="planoestudos_cargaHoraria"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="planoestudos"/>
+	</field>
+	<field name="planoestudos_semestre_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="semestre_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="planoestudos_semestre_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="planoestudos"/>
+	</field>
+	<field name="planoestudos_anocurso_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="anocurso_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="planoestudos_anocurso_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="planoestudos"/>
+	</field>
+	<field name="disciplina_nome" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="disciplina_nome"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="disciplina"/>
+	</field>
+	<field name="curso_nome" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso_nome"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="turma_nome" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="turma_nome"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="turma"/>
+	</field>
+	<field name="fds" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="fds"/>
+		<property name="com.jaspersoft.studio.field.label" value="fds"/>
+	</field>
+	<variable name="nomeCompleto" class="java.lang.String">
+		<variableExpression><![CDATA[$F{estudante_nome}.concat( " ").concat($F{estudante_apelido})]]></variableExpression>
+	</variable>
+	<title>
+		<band height="169" splitType="Stretch">
+			<image scaleImage="FillFrame" hAlign="Center" vAlign="Middle">
+				<reportElement x="236" y="27" width="98" height="83" uuid="f767a0ac-bcec-4e28-bcf1-a1217f60d8d3"/>
+				<imageExpression><![CDATA["classpath:/pics/Logotipo.jfif"]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="0" y="138" width="555" height="20" uuid="34ad809c-a30a-4df8-88fe-7129ae1ed937"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[FICHA DE INSCRIÇÃO SEMESTRAL]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="-2" y="116" width="555" height="20" uuid="05084b80-17ed-4fbd-8d96-4e782f966dfc"/>
+				<textElement textAlignment="Center">
+					<font isBold="false"/>
+				</textElement>
+				<text><![CDATA[DIRECÇÃO DO REGISTO ACADÉMICO]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="93" splitType="Stretch">
+			<staticText>
+				<reportElement x="1" y="46" width="120" height="20" uuid="721c0e26-2553-43c9-80ea-62d44ddcc9e1"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nome do Estudante:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="1" y="68" width="39" height="20" uuid="c3b83b62-8149-4fcd-b826-770b79e1a172"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Curso: ]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="27" width="555" height="1" uuid="e070210e-0c33-4a00-a2db-bfe3e0404c57"/>
+			</line>
+			<staticText>
+				<reportElement x="2" y="6" width="129" height="20" uuid="a89327ec-3ca8-46a1-b1f3-a5cfe59941c9"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dados do Estudante:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="401" y="46" width="52" height="20" uuid="7a061924-a2ad-4c69-b180-054f64fa10c6"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Número:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="339" y="6" width="73" height="20" uuid="35454a22-95a9-4ffe-b1d8-0d10a9a82be6"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ano Lectivo:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="489" y="7" width="64" height="20" uuid="e27cf9d2-1e6c-4b28-bcf1-045399b8b403"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Semestre]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="484" y="6" width="4" height="20" uuid="ff405f8a-b822-4dea-87cb-2237d4e04252"/>
+				<text><![CDATA[º]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="413" y="6" width="45" height="20" uuid="438db162-3411-4071-b7f1-4c369e7f8a24"/>
+				<textElement textAlignment="Left"/>
+				<textFieldExpression><![CDATA[$F{inscricao_anoLectivo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="477" y="6" width="7" height="20" uuid="7176038d-a600-4018-b7cc-759679be07d1"/>
+				<textFieldExpression><![CDATA[$F{inscricao_semestre}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="456" y="46" width="100" height="20" uuid="4dd7d448-bdc9-45a4-8937-611c9679d2c7"/>
+				<textFieldExpression><![CDATA[$F{estudante_numero}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="40" y="68" width="358" height="20" uuid="16c296d1-e22a-4ba7-81da-d657cf63b3b8"/>
+				<textFieldExpression><![CDATA[$F{curso_nome}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Auto" isBlankWhenNull="false">
+				<reportElement x="121" y="46" width="230" height="20" uuid="bcc661de-4b9c-42a7-b700-2013840a4179">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$V{nomeCompleto}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="401" y="68" width="44" height="20" uuid="30f00c54-f620-4cfb-92fe-17ee020ed928"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[FDS:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="450" y="68" width="100" height="20" uuid="c2ff52a2-017f-4f44-a84d-5f631d2fbee0"/>
+				<textFieldExpression><![CDATA[$F{fds}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="48" splitType="Stretch">
+			<rectangle>
+				<reportElement x="0" y="28" width="555" height="20" uuid="5b2a2cc9-ac96-47fd-ab11-956055ae1966"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="3" y="28" width="394" height="20" uuid="eeedb5d2-cc90-4782-a1c6-5cfe7e3aaa1e"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[DISCIPLINAS INSCRITAS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="397" y="28" width="26" height="20" uuid="850e5575-0528-4f5a-a3a5-55b6a62afff2"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Ano]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="424" y="28" width="41" height="20" uuid="ba14b116-5750-4ca8-9425-7a4f2bcd4a52"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Semestre]]></text>
+			</staticText>
+			<line>
+				<reportElement x="398" y="28" width="1" height="20" uuid="76c001f9-5953-4e10-8f1d-878b9c5b0679"/>
+			</line>
+			<line>
+				<reportElement x="423" y="28" width="1" height="20" uuid="3ee36f80-1564-44cd-b7da-3a1b9e832235"/>
+			</line>
+			<staticText>
+				<reportElement x="468" y="28" width="87" height="20" uuid="fc8a031b-2251-4cb0-9166-b6b43870e634"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Turma]]></text>
+			</staticText>
+			<line>
+				<reportElement x="467" y="28" width="1" height="20" uuid="2efc3fcb-433d-4a5e-b8b7-8996879c1498"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Prevent">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="0" width="555" height="14" uuid="b196f03b-721f-4a6d-9a3f-e87bdf3bcc6b">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<line>
+				<reportElement x="423" y="0" width="1" height="14" uuid="f10e31ce-f9a5-4b39-b3f7-cc3be4cc5417">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</line>
+			<line>
+				<reportElement x="467" y="0" width="1" height="14" uuid="2197c654-9a0f-4fbf-b4ba-dfdc10370221">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</line>
+			<line>
+				<reportElement x="398" y="0" width="1" height="14" uuid="c80dfb55-0159-4293-ac45-8fa80b160baa">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</line>
+			<staticText>
+				<reportElement x="413" y="0" width="4" height="14" uuid="9de81f92-dd47-4779-92b4-9ec58cf3cc0b"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[º]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="448" y="0" width="8" height="14" uuid="876d721e-f840-4fcc-aa0b-d13b19a0ea3d">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[º]]></text>
+			</staticText>
+			<textField textAdjust="ScaleFont">
+				<reportElement stretchType="ContainerHeight" x="3" y="0" width="394" height="14" uuid="b328c6ac-cba0-44ee-a041-e9983e72ca08">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{disciplina_nome}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="401" y="0" width="10" height="14" uuid="7fe5fdca-9a39-4966-ace3-e7b40692ce50"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{planoestudos_anocurso_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="434" y="0" width="11" height="14" uuid="7f415233-d64a-4f34-abf3-a4e1a182fd6e"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{planoestudos_semestre_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="468" y="0" width="87" height="14" uuid="9489ec55-58bf-426c-836a-73cc0a312475"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{turma_nome}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="300" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<subreport>
+				<reportElement x="1" y="8" width="510" height="26" uuid="ea39e182-576e-4864-a0bc-18d27402f075"/>
+				<subreportParameter name="estId">
+					<subreportParameterExpression><![CDATA[$P{PAR_ESTID}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="anoLec">
+					<subreportParameterExpression><![CDATA[$P{PAR_ANOL}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="sem">
+					<subreportParameterExpression><![CDATA[$P{PAR_SEM}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="entidade">
+					<subreportParameterExpression><![CDATA[$P{entidade}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "comprovativo_inscricao_propina.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</columnFooter>
+	<pageFooter>
+		<band height="97">
+			<staticText>
+				<reportElement x="348" y="77" width="66" height="20" uuid="ed28d7d2-9213-4bcf-8747-7f1f0ead056e"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Data e Hora:]]></text>
+			</staticText>
+			<textField pattern="dd-MM-yyyy HH:mm">
+				<reportElement x="417" y="77" width="111" height="20" uuid="c1da9682-58f7-4278-8d8b-e9fcdde269ec"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="34" y="18" width="188" height="20" uuid="7d0ebece-d943-47ab-8963-b3762dbdbcf3"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[Assinatura do Estudante]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="367" y="17" width="123" height="20" uuid="f01b8e61-504b-4855-a9e3-5767a119a33c"/>
+				<textElement textAlignment="Center"/>
+				<text><![CDATA[O Utilizador]]></text>
+			</staticText>
+			<line>
+				<reportElement x="34" y="52" width="188" height="1" uuid="e2070134-3c33-4a92-bfe7-2cd41398199b"/>
+			</line>
+			<line>
+				<reportElement x="339" y="51" width="188" height="1" uuid="3667347b-44db-42c4-9b73-5b727cd63461"/>
+			</line>
+			<textField isBlankWhenNull="true">
+				<reportElement x="300" y="55" width="255" height="20" uuid="a5f54a2d-7f7f-4b02-9d9c-7a90cf304af8"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$P{PAR_OPERADOR}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="34" y="55" width="189" height="20" uuid="460a0681-c703-411d-b032-335e568e36b8"/>
+				<textElement textAlignment="Center"/>
+				<textFieldExpression><![CDATA[$F{estudante_email}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

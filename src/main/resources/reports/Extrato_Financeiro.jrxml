@@ -1,0 +1,830 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Extrato_Financeiro" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8e46cacf-f15e-438c-bccb-101673f3d53b">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="woodrose"/>
+	<parameter name="PAR_ESTUDANTE" class="java.lang.Long"/>
+	<parameter name="PAR_ANOLECTIVO" class="java.lang.Integer"/>
+	<parameter name="PAR_LOGO" class="java.lang.String"/>
+	<parameter name="PAR_ENTIDADE" class="java.lang.String"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT  
+    es.nome,
+    es.apelido,
+    es.responsavel_financeiro,
+    es.telefone_fixo,
+    es.email_responsavel_financeiro,
+    fac.nome as faculdade,
+    cc.ano_lectivo,
+    REGEXP_REPLACE(cc.tipo_emolumento, ' *(ano lectivo 2025|do ano 2025)', '') as tipo_emolumento,
+    cc.total_debito,
+    cc.data_limite_pagamento,
+    cc.referencia,
+    CAST(COALESCE(DATE_FORMAT(cc.data_pagamento, '%d/%m/%Y'), '') AS CHAR) AS data_pagamento,
+    CASE 
+    WHEN cc.pago = 1 
+         AND cc.valor_depositado > cc.total_debito 
+         AND EXISTS (
+             SELECT 1 
+             FROM contacorrente cc2 
+             WHERE cc2.recibo = cc.recibo 
+             AND cc2.valor_depositado = cc.valor_depositado 
+             AND cc2.id <> cc.id
+         ) 
+    THEN cc.total_debito 
+    ELSE cc.valor_depositado 
+END AS valor_depositado,
+    (cc.total_debito - cc.valor_depositado) AS saldo,
+    CASE 
+        WHEN cc.recibo = 0 THEN ''
+        ELSE CAST(cc.recibo AS CHAR) 
+    END AS recibo,
+   CASE 
+        WHEN fac.id = 1 THEN 'Av. De Namaacha Km15, Chinonanquila, Matola City, Boane'
+        WHEN fac.id = 2 THEN 'Liberdade: Av Das Industrias, Nº 3787, B. Liberdade - Matola'
+		WHEN fac.id = 3 THEN 'Rua Joao de Barros nº 367, Bairro da Sommerschild - Maputo'
+		WHEN fac.id = 4 THEN 'Rua das FLPM Muahivire, Cidade da Nampula, Nampula, Mozambique'
+        ELSE 'Rua sem saída, Bairro Cimento_ Cidade de Pemba _Cabo Delgado' 
+    END AS endereco,
+        CASE 
+        WHEN fac.id = 1 THEN 'Contacto: 87 039 4582'
+        WHEN fac.id = 2 THEN 'Contacto: 87 116 9663 '
+		WHEN fac.id = 3 THEN 'Contacto: 87 816 6160'
+		WHEN fac.id = 4 THEN 'Contacto: 87 282 4915'
+        ELSE 'Contacto: 87 897 2700' 
+    END AS contacto_escola,
+            CASE 
+        WHEN fac.id = 1 THEN 'E-mail: treasury.matola@woodroseschool.co.mz'
+        WHEN fac.id = 2 THEN 'E-mail: admin.liberdade@woodroseschool.co.mz '
+		WHEN fac.id = 3 THEN 'E-mail: admin.maputo@woodroseschool.co.mz'
+		WHEN fac.id = 4 THEN 'E-mail: officeexecutive1.nampula@woodroseschool.co.mz'
+        ELSE 'E-mail: officemanager.pemba@woodroseschool.co.mz' 
+    END AS email_escola,
+                CASE 
+        WHEN fac.id in (1, 4, 5) THEN 'NUIT: 400292256'
+		WHEN fac.id = 2 THEN 'NUIT: 400961506'
+        ELSE 'NUIT: 400240167' 
+    END AS nuit_escola,
+    cu.nome as classe,
+
+    (SELECT SUM(total_debito) 
+     FROM contacorrente 
+     WHERE estudante_id = cc.estudante_id 
+       AND ano_lectivo = cc.ano_lectivo 
+       AND emolumento_id != 55) AS prop_anual,
+
+    (SELECT SUM(total_debito) 
+     FROM contacorrente 
+     WHERE estudante_id = cc.estudante_id 
+       AND ano_lectivo = cc.ano_lectivo 
+       AND emolumento_id = 55) AS multa_anual,
+       
+    (SELECT SUM(total_debito) 
+     FROM contacorrente 
+     WHERE estudante_id = cc.estudante_id 
+       AND ano_lectivo = cc.ano_lectivo
+       AND data_limite_pagamento < CURDATE()) AS factura_cumul_ate,
+
+    (SELECT SUM(total_debito) 
+     FROM contacorrente 
+     WHERE estudante_id = cc.estudante_id 
+       AND ano_lectivo = cc.ano_lectivo) AS total_anual,
+
+    SUM(cc.valor_depositado) AS pago_ate_data,
+
+
+SUM(case when total_debito - COALESCE(valor_depositado, 0)>=0 then total_debito - COALESCE(valor_depositado, 0) else 0 end) 
+OVER (PARTITION BY cc.estudante_id 
+      ORDER BY 
+          CASE WHEN cc.data_pagamento IS NULL THEN 1 ELSE 0 END, 
+          cc.data_pagamento ASC, 
+          cc.data_limite_pagamento ASC, 
+          cc.id ASC 
+      ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS saldo_cumulativo,
+    
+          SUM(
+        CASE 
+            WHEN cc.data_limite_pagamento < CURDATE() AND pago=0
+            THEN (cc.total_debito - COALESCE(cc.valor_depositado, 0)) 
+            ELSE 0 
+        END
+    ) OVER (PARTITION BY cc.estudante_id ORDER BY cc.data_limite_pagamento 
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS saldo_por_regularizar
+
+FROM contacorrente cc 
+INNER JOIN estudante es ON cc.estudante_id = es.id
+INNER JOIN sessaoturma ss ON cc.turma_id = ss.id
+INNER JOIN curso cu ON ss.curso_id = cu.id
+inner join faculdade fac on cu.faculdade_id=fac.id
+
+WHERE
+    cc.estudante_id = $P{PAR_ESTUDANTE}
+    AND cc.ano_lectivo = $P{PAR_ANOLECTIVO}
+
+GROUP BY 
+    es.nome, es.apelido, es.responsavel_financeiro, es.telefone_fixo, es.email_responsavel_financeiro,
+    fac.nome, fac.id, 
+    cc.ano_lectivo, cc.tipo_emolumento, cc.total_debito, cc.data_limite_pagamento, 
+    cc.referencia, cc.data_pagamento, cc.pago, cc.valor_depositado, cc.recibo, cu.nome, cc.id
+ORDER BY cc.pago DESC, cc.data_limite_pagamento, cc.data_pagamento;]]>
+	</queryString>
+	<field name="nome" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="nome"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="apelido" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="apelido"/>
+		<property name="com.jaspersoft.studio.field.label" value="apelido"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="responsavel_financeiro" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="responsavel_financeiro"/>
+		<property name="com.jaspersoft.studio.field.label" value="responsavel_financeiro"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="telefone_fixo" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="telefone_fixo"/>
+		<property name="com.jaspersoft.studio.field.label" value="telefone_fixo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="email_responsavel_financeiro" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="email_responsavel_financeiro"/>
+		<property name="com.jaspersoft.studio.field.label" value="email_responsavel_financeiro"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="estudante"/>
+	</field>
+	<field name="faculdade" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="faculdade"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="faculdade"/>
+	</field>
+	<field name="ano_lectivo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="ano_lectivo"/>
+		<property name="com.jaspersoft.studio.field.label" value="ano_lectivo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="tipo_emolumento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipo_emolumento"/>
+		<property name="com.jaspersoft.studio.field.label" value="tipo_emolumento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="total_debito" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="total_debito"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_debito"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="data_limite_pagamento" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="data_limite_pagamento"/>
+		<property name="com.jaspersoft.studio.field.label" value="data_limite_pagamento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="referencia" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="referencia"/>
+		<property name="com.jaspersoft.studio.field.label" value="referencia"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="data_pagamento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="data_pagamento"/>
+		<property name="com.jaspersoft.studio.field.label" value="data_pagamento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="valor_depositado" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="valor_depositado"/>
+		<property name="com.jaspersoft.studio.field.label" value="valor_depositado"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="saldo" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="saldo"/>
+		<property name="com.jaspersoft.studio.field.label" value="saldo"/>
+	</field>
+	<field name="recibo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="recibo"/>
+		<property name="com.jaspersoft.studio.field.label" value="recibo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="endereco" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="endereco"/>
+		<property name="com.jaspersoft.studio.field.label" value="endereco"/>
+	</field>
+	<field name="contacto_escola" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="contacto_escola"/>
+		<property name="com.jaspersoft.studio.field.label" value="contacto_escola"/>
+	</field>
+	<field name="email_escola" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="email_escola"/>
+		<property name="com.jaspersoft.studio.field.label" value="email_escola"/>
+	</field>
+	<field name="nuit_escola" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nuit_escola"/>
+		<property name="com.jaspersoft.studio.field.label" value="nuit_escola"/>
+	</field>
+	<field name="classe" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="classe"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="prop_anual" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="prop_anual"/>
+		<property name="com.jaspersoft.studio.field.label" value="prop_anual"/>
+	</field>
+	<field name="multa_anual" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="multa_anual"/>
+		<property name="com.jaspersoft.studio.field.label" value="multa_anual"/>
+	</field>
+	<field name="factura_cumul_ate" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="factura_cumul_ate"/>
+		<property name="com.jaspersoft.studio.field.label" value="factura_cumul_ate"/>
+	</field>
+	<field name="total_anual" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="total_anual"/>
+		<property name="com.jaspersoft.studio.field.label" value="total_anual"/>
+	</field>
+	<field name="pago_ate_data" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="pago_ate_data"/>
+		<property name="com.jaspersoft.studio.field.label" value="pago_ate_data"/>
+	</field>
+	<field name="saldo_cumulativo" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="saldo_cumulativo"/>
+		<property name="com.jaspersoft.studio.field.label" value="saldo_cumulativo"/>
+	</field>
+	<field name="saldo_por_regularizar" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="saldo_por_regularizar"/>
+		<property name="com.jaspersoft.studio.field.label" value="saldo_por_regularizar"/>
+	</field>
+	<variable name="total_valor_pago" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{valor_depositado}]]></variableExpression>
+	</variable>
+	<variable name="total_debito" class="java.math.BigDecimal" calculation="Sum">
+		<variableExpression><![CDATA[$F{total_debito}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="165" splitType="Stretch">
+			<staticText>
+				<reportElement x="80" y="125" width="400" height="22" uuid="f9e4be57-fa9b-41a3-a818-066b5008f920"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[EXTRATO ANALITICO E FINANCEIRO]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement mode="Transparent" x="3" y="-3" width="554" height="90" uuid="a80bd3e0-20d2-413b-9e9c-f8123809f3e1"/>
+			</rectangle>
+			<image hAlign="Left" vAlign="Middle" isLazy="true" evaluationTime="Report">
+				<reportElement stretchType="ElementGroupHeight" x="7" y="0" width="353" height="85" uuid="6cad834e-b9db-49f9-a841-dc96dda638af">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA["classpath:/pics/logo_report.png"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="360" y="31" width="197" height="19" uuid="387e97c2-9b7d-491f-9ed2-f5834640661c"/>
+				<textElement textAlignment="Left">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Endereco: "+$F{endereco}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="360" y="9" width="197" height="9" uuid="bc984451-26f7-4576-945d-da9075b3cc61"/>
+				<textElement textAlignment="Left">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{email_escola}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="360" y="20" width="197" height="9" uuid="437a8ca2-ba60-4b2e-bf43-3bd2b03591c2"/>
+				<textElement textAlignment="Left">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contacto_escola}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="360" y="52" width="197" height="9" uuid="4184d9fe-e10d-4858-a872-f7e1b6af51b4"/>
+				<textElement textAlignment="Left">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nuit_escola}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="99" width="556" height="20" uuid="046054d1-69e0-4c09-a1ff-1c08166e2d4b"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["BRANCH - "+$F{faculdade}.toUpperCase()]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="121" splitType="Stretch">
+			<textField textAdjust="ScaleFont">
+				<reportElement x="0" y="29" width="278" height="20" uuid="a3fb62c1-06f1-4fd2-8f5a-9d601f833d15"/>
+				<textElement markup="html"/>
+				<textFieldExpression><![CDATA["<b>Nome do aluno: </b>"+$F{nome}+" "+$F{apelido}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="1" width="278" height="15" uuid="0e56b670-841d-4655-a692-51c531a81cae"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dados do Aluno]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="0" y="50" width="278" height="20" uuid="b3c8fb59-c33e-4bf6-86df-bc2c67f4d8c8"/>
+				<textElement markup="html"/>
+				<textFieldExpression><![CDATA["<b>Grade: </b>"+$F{classe}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="30" width="278" height="20" uuid="bd817c33-167d-43fe-9beb-c44f239da226"/>
+				<textElement markup="html"/>
+				<textFieldExpression><![CDATA["<b>Nome: </b>"+$F{responsavel_financeiro}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="290" y="1" width="278" height="15" uuid="95d37ae1-785a-405f-b391-db9c01c865f2"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Dados do Responsável Financeiro ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="290" y="51" width="278" height="20" uuid="40cfebb2-b78e-4276-bd2e-3bb37829ab17"/>
+				<textElement markup="html"/>
+				<textFieldExpression><![CDATA["<b>Contacto:</b> "+$F{telefone_fixo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="291" y="73" width="278" height="20" uuid="6665cc34-13d5-4a68-971d-f67f2e5df115"/>
+				<textElement markup="html"/>
+				<textFieldExpression><![CDATA["<b>E-mail: </b>"+$F{email_responsavel_financeiro}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="74" width="130" height="19" uuid="c52e2213-bc63-4915-9f18-c49f6a8b40b6"/>
+				<textElement markup="html"/>
+				<textFieldExpression><![CDATA["<b>Ano Lectivo: </b>"+$P{PAR_ANOLECTIVO}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="-10" y="19" width="575" height="1" uuid="876c769f-99eb-43ee-a7d8-2c6558a23bb2"/>
+			</line>
+			<textField>
+				<reportElement x="0" y="95" width="240" height="19" uuid="2fef8d90-d295-44dd-b8dd-a03a9b897abd"/>
+				<textElement markup="html"/>
+				<textFieldExpression><![CDATA["<b>Entidade para Pagamento: </b>"+$P{PAR_ENTIDADE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<rectangle>
+				<reportElement x="-10" y="0" width="575" height="20" uuid="1d1d3105-be08-4950-9bb4-4da21622513c"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="-10" y="0" width="139" height="20" uuid="9f9da748-c877-46c5-8587-3989a7f1db7c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7459b6ef-2a8e-4b3c-b650-ad092974d4b9"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Categoria]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="129" y="0" width="61" height="20" uuid="efd02328-d5fa-4a7f-b144-c6c1b4b048e3">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="67003b80-4a79-43f0-9504-aeb9376b38a3"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor da Factura]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="191" y="0" width="49" height="20" uuid="042f3ec7-ece8-4038-ae1b-79e6d834eaf0">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="08ba8a21-eb96-4e30-97d4-fbe8280f0965"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Prazo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="242" y="0" width="65" height="20" uuid="12144315-aded-44f6-ac4d-7dd8eb68b754">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8e4aeae8-9c92-4580-a509-897ed1ba6a60"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Referencia]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="308" y="0" width="51" height="20" uuid="376dec31-c0de-415a-9201-1c73e44a540f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="40b397cb-4a06-4785-bfc6-b0c9eefa6a93"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Data de Pag.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="360" y="0" width="69" height="20" uuid="94421041-cdf8-491a-8ef1-cbc7d33e4534">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a285c9c3-3eda-468b-90d9-a112b0a94b3b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Valor Pago]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="429" y="0" width="70" height="20" uuid="083d1427-13b3-49f9-8df1-48114fd23c4a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="264f3e16-bb33-4480-9b13-d38136aafb87"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saldo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="500" y="0" width="65" height="20" uuid="213a2388-200b-4f6b-8c7f-968a94d5609b">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cecae38c-022c-48b3-ac5c-68810c694af1"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="7" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Rec.]]></text>
+			</staticText>
+			<line>
+				<reportElement x="128" y="0" width="1" height="20" uuid="ee052949-92c9-4172-902f-2b947dba4050"/>
+			</line>
+			<line>
+				<reportElement x="190" y="0" width="1" height="20" uuid="07f1083c-58b6-4e67-b421-3e7debcaf3bf"/>
+			</line>
+			<line>
+				<reportElement x="307" y="0" width="1" height="20" uuid="b4823da5-1da5-4bdd-90f4-42eb07b62fa5"/>
+			</line>
+			<line>
+				<reportElement x="359" y="0" width="1" height="20" uuid="299ffa9b-a445-4cee-8642-980a2516efd9"/>
+			</line>
+			<line>
+				<reportElement x="429" y="0" width="1" height="20" uuid="5e01cc60-a07a-4d39-8290-18eb8f8cbd05"/>
+			</line>
+			<line>
+				<reportElement x="499" y="0" width="1" height="20" uuid="cfa40152-8303-485a-9959-0f68dba67b52"/>
+			</line>
+			<line>
+				<reportElement x="240" y="0" width="1" height="20" uuid="07fa1511-0eb5-4521-a70a-5d40683737e2"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="18" splitType="Stretch">
+			<rectangle>
+				<reportElement x="-10" y="0" width="575" height="18" uuid="c64ef2fd-3bfc-47f2-b499-42b25bfc5a98"/>
+			</rectangle>
+			<textField textAdjust="ScaleFont">
+				<reportElement x="-8" y="0" width="136" height="18" uuid="7d0ecee4-995a-434f-b07c-979aec8c0012">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="7459b6ef-2a8e-4b3c-b650-ad092974d4b9"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{tipo_emolumento}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="129" y="0" width="59" height="18" uuid="ab01f572-b854-4701-afdc-5e6b20b88cbc">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="67003b80-4a79-43f0-9504-aeb9376b38a3"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_debito}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="191" y="0" width="49" height="18" uuid="ba41e165-0420-40e1-a9ca-a089e4c9ea99">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="08ba8a21-eb96-4e30-97d4-fbe8280f0965"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy").format($F{data_limite_pagamento})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="242" y="0" width="65" height="18" uuid="68879a2a-e295-48c2-baac-99cf1a0f10cb">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="8e4aeae8-9c92-4580-a509-897ed1ba6a60"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{referencia}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="308" y="0" width="51" height="18" uuid="c972dee2-3751-4def-92be-e986fc487308">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="40b397cb-4a06-4785-bfc6-b0c9eefa6a93"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{data_pagamento}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="360" y="0" width="66" height="18" uuid="b29d6796-8113-4855-b290-c8f062c00085">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a285c9c3-3eda-468b-90d9-a112b0a94b3b"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{valor_depositado}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="429" y="0" width="68" height="18" uuid="1df8e7c1-b80f-4e60-a1b8-f641676d562a">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="264f3e16-bb33-4480-9b13-d38136aafb87"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle" markup="none">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{saldo_cumulativo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="499" y="0" width="66" height="18" uuid="af42cef3-abb6-452b-8862-647f875c3c69">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cecae38c-022c-48b3-ac5c-68810c694af1"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{recibo}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="128" y="0" width="1" height="18" uuid="e47d73b9-0105-4dc2-a9bd-c272a9365742"/>
+			</line>
+			<line>
+				<reportElement x="190" y="0" width="1" height="18" uuid="123d60ef-490b-4f10-8b7c-5a7043bce12f"/>
+			</line>
+			<line>
+				<reportElement x="307" y="0" width="1" height="18" uuid="a8de24d1-84f3-4984-8a09-443a4d1654c0"/>
+			</line>
+			<line>
+				<reportElement x="359" y="0" width="1" height="18" uuid="35b5f2fa-249d-4cdb-8013-36e3af1b648a"/>
+			</line>
+			<line>
+				<reportElement x="429" y="0" width="1" height="18" uuid="38c63a66-3c03-446c-be30-a85af7b326f8"/>
+			</line>
+			<line>
+				<reportElement x="499" y="0" width="1" height="18" uuid="10975587-f2fc-48a3-ad50-6f7319ec086f"/>
+			</line>
+			<line>
+				<reportElement x="240" y="0" width="1" height="18" uuid="acb33b21-7101-47f7-a872-4bc587b2dc44"/>
+			</line>
+		</band>
+	</detail>
+	<summary>
+		<band height="234" splitType="Stretch">
+			<rectangle>
+				<reportElement x="-10" y="0" width="575" height="18" uuid="e50d13a9-334b-4458-9f7f-cd82cf2eb45a"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="-10" y="0" width="138" height="18" uuid="40686d08-e3c5-49f1-b7d5-b56ff7159776"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8.5" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL/Year]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="360" y="0" width="65" height="18" uuid="b227edb9-be72-4576-aef1-fcc3c182e8c3"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_valor_pago}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="129" y="0" width="59" height="18" uuid="ac99b79c-0fb7-4a05-aac6-6153b6058cfd">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8.5"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_debito}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="429" y="0" width="1" height="18" uuid="1765793f-30f4-4fb1-b9eb-a3c9de4b761a"/>
+			</line>
+			<line>
+				<reportElement x="499" y="0" width="1" height="18" uuid="d593ed50-70a5-4f17-a31f-dd8dbf9749d2"/>
+			</line>
+			<line>
+				<reportElement x="359" y="0" width="1" height="18" uuid="a7b95281-3f30-4631-97fb-031398eb6000"/>
+			</line>
+			<line>
+				<reportElement x="307" y="0" width="1" height="18" uuid="a7ac1b92-9fd6-46b6-95f9-bab449534688"/>
+			</line>
+			<line>
+				<reportElement x="190" y="0" width="1" height="18" uuid="e822843d-ef6a-4da7-a057-15fc24ee55ac"/>
+			</line>
+			<line>
+				<reportElement x="128" y="0" width="1" height="18" uuid="64062376-5530-488a-9f6a-6b0b634a8e68"/>
+			</line>
+			<rectangle>
+				<reportElement x="50" y="105" width="96" height="19" uuid="f4080c7f-23c9-4c89-86d9-03170e2cbeee"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="146" y="105" width="71" height="19" uuid="26256dec-dc41-4ed6-88bd-7583e196a411"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="50" y="86" width="96" height="19" uuid="453071c7-d69a-40a7-b08e-733f7965a076"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="146" y="86" width="71" height="19" uuid="3a6867a4-a1a4-4c55-831c-590dc81a4a2f"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="50" y="67" width="96" height="19" uuid="976814ed-a2df-4208-9b15-13d5aebf6fbd"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="146" y="67" width="71" height="19" uuid="3a344154-0d94-43ba-a337-4fdf75503d66"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="50" y="48" width="96" height="19" uuid="df6a010f-78a4-4376-929d-5f2bf60c0c4b"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="146" y="48" width="71" height="19" uuid="e412d0f5-b636-4912-ae41-ea123c7f7cda"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="255" y="105" width="179" height="19" uuid="9e5eb3a9-084a-4473-a6a3-ad952009a174"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="434" y="105" width="71" height="19" uuid="1266588e-716a-40e8-95c3-0fecd79300df"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="434" y="67" width="71" height="19" uuid="6dc87758-2907-4671-b92e-2adb96aef42c"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="255" y="67" width="179" height="19" uuid="f696e904-f9a3-42eb-8fb5-d684048012ff"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="434" y="48" width="71" height="19" uuid="be1d8c45-d485-4c94-b1a0-fbc89c5819a9"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="255" y="48" width="179" height="19" uuid="42f97484-aadb-4a72-90ca-c717422b0bd3"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="60" y="48" width="86" height="19" uuid="91ab4159-0e2c-4ef5-b52f-1916d7a6c42b"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Propina Anual]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="67" width="86" height="19" uuid="0fd5fcbb-3481-4517-a97b-7c6ca8493317"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Multa Anual]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="86" width="86" height="19" uuid="f49e6946-5525-40be-99d8-afc80a1eff3a"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total Anual]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="105" width="86" height="19" uuid="8bf0ea4b-23f7-47c5-acca-d76eacd14854"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Saldo Anual]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="147" y="48" width="68" height="19" uuid="e4180493-993a-4996-940b-61d73246df09"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{prop_anual}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00" isBlankWhenNull="true">
+				<reportElement x="147" y="68" width="68" height="18" uuid="4058af8d-235c-40a7-b357-a708586e0fa8"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{multa_anual}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="147" y="87" width="68" height="18" uuid="038da99b-cfa6-4d3f-ac85-a9db4fda67c6"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_anual}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="147" y="106" width="68" height="18" uuid="0e45035f-53cf-4fd1-b64a-5584943c8454"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{saldo_cumulativo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="29" width="166" height="18" uuid="35db8b1c-f433-4cb4-8598-ebdebc019880"/>
+				<textElement textAlignment="Center">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sumário Anual]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="48" width="174" height="19" uuid="021b827a-8693-4c81-a7a2-b590a8b78c04"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Situação financeira até a data]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="67" width="174" height="19" uuid="a0ab36e8-dde6-44bf-bb0b-1ebf9b809a36"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Factura cumulativa até a data]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="260" y="105" width="174" height="19" uuid="92e68841-e686-45cd-b3bc-d6cc439057f4"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Divida por regularizar]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="435" y="48" width="68" height="19" uuid="55d389bc-d0b1-4850-9a51-a8d42e495b9f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date())]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="435" y="68" width="68" height="18" uuid="74c26f68-22f7-4863-98c4-d45df1dea404"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{factura_cumul_ate}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="435" y="106" width="68" height="18" uuid="1d1d9f56-4cd4-426e-8b60-4725049f2382"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{saldo_por_regularizar}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="289" y="29" width="170" height="18" uuid="1be9f828-f063-480a-9865-079f46f76850"/>
+				<textElement textAlignment="Center">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sumário Periodico]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="255" y="86" width="180" height="19" uuid="3c071b85-1b9b-4825-ba83-09cdcb44efba"/>
+			</rectangle>
+			<rectangle>
+				<reportElement x="434" y="86" width="71" height="19" uuid="90c04e55-4cf7-4ff0-a8cf-97739b39692c"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="259" y="87" width="176" height="18" uuid="55fcf650-0bac-48ee-b728-004911454fca"/>
+				<textElement verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Pago até a data]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="435" y="87" width="68" height="18" uuid="0f9f7102-9442-4afd-8597-609f219ed36c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{total_valor_pago}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="140" width="556" height="18" uuid="9df339d3-cef7-4122-ad7f-091e51f8c723"/>
+				<textElement textAlignment="Center">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Regra de Pagamento de Propinas]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="158" width="556" height="76" uuid="c7ae5e9e-3668-4976-ad67-1eb46c449d30">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Justified">
+					<font size="9"/>
+					<paragraph lineSpacing="Single" lineSpacingSize="1.5"/>
+				</textElement>
+				<text><![CDATA[1. A PROPINA É ANNUAL  e independentemente de o estudante se ausentar da escola por doença, feriados, férias ou demais motivos, NÃO FICA ISENTO DE PAGAR AS PRESTAÇÕES NA ÍNTEGRA.
+2. Recomendamos que faça sempre o pagamento antecipado para evitar Multa de 30% na prestação em atraso que irreversível e encarece a educação. 
+3. Sem prejuízo de aplicação de multa, a Woodrose poderá suspender  o estudante no quinto dia após a data limite, ou seja, dia 10, o estudante perde o acesso às actividades curriculares, até o efetivo e integral pagamento da dívida.]]></text>
+			</staticText>
+			<line>
+				<reportElement x="240" y="0" width="1" height="18" uuid="452b7af7-5459-4006-b05c-148bd66c2569"/>
+			</line>
+		</band>
+	</summary>
+</jasperReport>

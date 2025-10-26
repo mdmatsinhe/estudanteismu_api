@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.20.0.final using JasperReports Library version 6.20.0-2bc7ab61c56f459e8176eb05c7705e145cd400ad  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="comprovativo_inscricao_propina" language="groovy" pageWidth="555" pageHeight="802" columnWidth="555" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="70749ee7-73b8-4977-9a7a-e6db6b5d0ebe">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="woodrose"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="estId" class="java.lang.Long"/>
+	<parameter name="anoLec" class="java.lang.Integer"/>
+	<parameter name="sem" class="java.lang.Integer"/>
+	<parameter name="PAR_OPERADOR" class="java.lang.String"/>
+	<parameter name="entidade" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[SELECT
+     contacorrente.`debito` AS contacorrente_debito,
+     contacorrente.`referencia` AS contacorrente_referencia,
+     contacorrente.`tipo_emolumento` AS contacorrente_tipoEmolumento,
+     contacorrente.`data_limite_pagamento` AS contacorrente_dataLimitePagamento,
+     contacorrente.`estudante_id` AS contacorrente_estudante_id,
+     contacorrente.`ano_lectivo`  AS anoLectivo,
+     contacorrente.semestre AS semestre ,
+     contacorrente.taxa_imposto AS imposto,
+     contacorrente.total_debito As total
+FROM
+     contacorrente
+WHERE
+  contacorrente.`estudante_id` = $P{estId}
+  AND ano_lectivo= $P{anoLec} AND situacao not in ('CANCELADO','OK','NEGOCIADA')]]>
+	</queryString>
+	<field name="contacorrente_debito" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="debito"/>
+		<property name="com.jaspersoft.studio.field.label" value="contacorrente_debito"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="contacorrente_referencia" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="referencia"/>
+		<property name="com.jaspersoft.studio.field.label" value="contacorrente_referencia"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="contacorrente_tipoEmolumento" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="tipo_emolumento"/>
+		<property name="com.jaspersoft.studio.field.label" value="contacorrente_tipoEmolumento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="contacorrente_dataLimitePagamento" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="data_limite_pagamento"/>
+		<property name="com.jaspersoft.studio.field.label" value="contacorrente_dataLimitePagamento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="contacorrente_estudante_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="estudante_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="contacorrente_estudante_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="anoLectivo" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="ano_lectivo"/>
+		<property name="com.jaspersoft.studio.field.label" value="anoLectivo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="semestre" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="semestre"/>
+		<property name="com.jaspersoft.studio.field.label" value="semestre"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="imposto" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="taxa_imposto"/>
+		<property name="com.jaspersoft.studio.field.label" value="imposto"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<field name="total" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="total_debito"/>
+		<property name="com.jaspersoft.studio.field.label" value="total"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="contacorrente"/>
+	</field>
+	<pageHeader>
+		<band height="37" splitType="Stretch">
+			<staticText>
+				<reportElement x="2" y="17" width="287" height="20" uuid="b9fba73c-171e-4452-b043-9253b8533364"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[DETALHES PARA PAGAMENTO DE EMOLUMENTOS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="301" y="17" width="69" height="20" uuid="7a2ff602-612f-4065-9bad-f4a293624b1e"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Entidade:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="356" y="17" width="94" height="20" uuid="1aa751f1-861c-4964-95e7-863fa1a6298c"/>
+				<textFieldExpression><![CDATA[$P{entidade}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="29" splitType="Stretch">
+			<staticText>
+				<reportElement x="356" y="9" width="71" height="20" uuid="aed77d47-36f7-486f-bd85-0834d0450ab4"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Referência]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="492" y="9" width="62" height="20" uuid="dc8f941f-273f-4d57-ba9d-57249bea271a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Prazo]]></text>
+			</staticText>
+			<line>
+				<reportElement x="420" y="9" width="1" height="20" uuid="1fc4ce77-c2f4-4d4f-a7bb-d14f638864ee"/>
+			</line>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="8" width="555" height="20" uuid="b011ea43-c72d-470e-a7ae-7bda7f2b6eb8"/>
+			</rectangle>
+			<line>
+				<reportElement x="345" y="9" width="1" height="20" uuid="d92193c1-8436-479b-9e94-898ce33bc3a5"/>
+			</line>
+			<staticText>
+				<reportElement x="2" y="9" width="344" height="20" uuid="352ee221-a9fa-4c14-84e6-487dd979e7f7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descrição]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="421" y="9" width="73" height="20" uuid="3b010141-5563-43ad-acf7-d2950167b79e"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Total a Pagar]]></text>
+			</staticText>
+			<line>
+				<reportElement x="491" y="9" width="1" height="20" uuid="65017323-8d1e-4c4e-9b0d-f9e22d664989"/>
+			</line>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Immediate">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<line>
+				<reportElement x="420" y="0" width="1" height="14" uuid="a1666c24-0916-4e9a-8fc7-63489a389822">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</line>
+			<rectangle>
+				<reportElement mode="Transparent" x="0" y="-1" width="555" height="15" uuid="6fcc9937-65dd-4ef1-8093-099cb8a6f409">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</rectangle>
+			<line>
+				<reportElement x="345" y="0" width="1" height="14" uuid="55e70124-c95c-491d-901c-2b8275250edf">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</line>
+			<textField>
+				<reportElement x="347" y="0" width="73" height="13" uuid="106cccb2-1445-4f94-83c0-730d4040229c"/>
+				<textElement textAlignment="Center">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contacorrente_referencia}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement stretchType="ElementGroupHeight" x="3" y="0" width="342" height="13" uuid="757b426f-40f8-4e77-a793-c0bee4954223">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contacorrente_tipoEmolumento}]]></textFieldExpression>
+			</textField>
+			<textField pattern="dd-MM-yyyy">
+				<reportElement x="492" y="0" width="62" height="13" uuid="d3c0d32d-6274-4e06-99f5-c4c3d43514b8"/>
+				<textElement textAlignment="Center">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{contacorrente_dataLimitePagamento}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="421" y="0" width="50" height="13" uuid="7629d982-2153-4c0d-90d2-7cd7b3082aaf"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="470" y="0" width="20" height="13" uuid="228b4ec9-9c75-405c-a869-d739b3fc4664">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[ MT]]></text>
+			</staticText>
+			<line>
+				<reportElement x="491" y="0" width="1" height="14" uuid="58bf122a-defe-44fe-b9cc-1d64e28bba41">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+			</line>
+		</band>
+	</detail>
+	<summary>
+		<band height="246">
+			<staticText>
+				<reportElement x="1" y="30" width="554" height="115" uuid="bdc502c0-11ca-4b81-b795-d4099e890d47"/>
+				<textElement textAlignment="Justified">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[1.1. A MATRÍCULA é um custo pago obrigatoriamente, não reembolsável tanto trespassado, que garante a reserva da vaga do estudante durante um determinado ano letivo. 
+1.2. CONTEÚDOS é um custo pago obrigatoriamente, não reembolsável tanto trespassado, que garante a fruição do material didático ao estudante dento e fora do recinto escolar.
+1.3. A PROPINA é um custo pago obrigatoriamente, não reembolsável tanto trespassado. É o único que garante a fruição dos serviços educacionais e a permanência do estudante na Woodrose durante o ano lectivo inscrito.
+1.4. QUALQUER Pagamento feito em QUALQUER data NÃO é correspondente a algum mês/trimestre/semestre específico. Corresponde somente ao pagamento de uma Prestação/Parcela da PROPINA ANNUAL.
+1.5. O único método de Pagamento recomendado pela WOODROSE é por via de PAGAMENTO DE SERVIÇO, onde vai inserir a ENTIDADE e a REFERÊNCIA do seu educando.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="11" width="172" height="18" uuid="d0a97bd7-649d-4d55-9fdc-4814d90413a3"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Termos e condições aplicáveis]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="145" width="554" height="80" uuid="962709aa-9aac-4644-b5e1-abaa1e569c85"/>
+				<textElement textAlignment="Justified"/>
+				<text><![CDATA[Eu, ________________________________, portador do documento de identificação n.º ____________________, na qualidade de encarregado de educação do estudante ________________________________, matriculado na WOODROSE INTERNATIONAL SCHOOL, declaro, sob compromisso de honra, possuir capacidade financeira para pagar as propinas e quaisquer outras despesas relacionadas, resultantes da relação contratual de prestação de serviços educacionais ao referido educando.                                                                                              
+Por ser expressão da verdade, firmo a presente declaração para os devidos efeitos legais.	]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>
