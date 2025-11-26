@@ -29,6 +29,7 @@ public class EstudanteDTO {
     private String endereco;
     private Long nuit;
     private boolean bolseiro;
+    private boolean dadosActualizados;
 
     // Construtor vazio para uso com bibliotecas de serialização/deserialização (ex: Jackson)
     public EstudanteDTO() {}
@@ -40,7 +41,7 @@ public class EstudanteDTO {
         this.apelido = estudante.getApelido();
         this.numero = estudante.getNumero();
         this.dataNascimento = estudante.getDataNascimento();
-        this.validadeDocumentoIdentificacao = estudante.getValidadeDocumentoIDentificacao();
+        this.validadeDocumentoIdentificacao = estudante.getValidadeDocumentoIdentificacao();
         this.numeroDocumentoIdentificacao = estudante.getNumeroDocumentoIdentificacao();
         this.distrito = estudante.getDistrito() != null ? estudante.getDistrito().getId() : null;
         this.estadoCivil = estudante.getEstadoCivil() != null ? estudante.getEstadoCivil().getId() : null;

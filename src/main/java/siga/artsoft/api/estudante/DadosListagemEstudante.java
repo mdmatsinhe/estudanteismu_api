@@ -35,7 +35,7 @@ public record DadosListagemEstudante(
     public DadosListagemEstudante(Estudante estudante){
         this(estudante.getId(), estudante.getNome(),estudante.getApelido(),
                 estudante.getNumero(),estudante.getDataNascimento(),
-                estudante.getValidadeDocumentoIDentificacao(),
+                estudante.getValidadeDocumentoIdentificacao(),
                 estudante.getNumeroDocumentoIdentificacao(),
                 estudante.getDistrito()!=null?estudante.getDistrito().getId():0L,estudante.getEstadoCivil()!=null?estudante.getEstadoCivil().getId():0L,
                 estudante.getSexo()!=null?estudante.getSexo().getId():0L,estudante.getNomePai(),estudante.getNomeMae(),

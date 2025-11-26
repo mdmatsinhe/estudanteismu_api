@@ -1,8 +1,10 @@
 package siga.artsoft.api.estudante;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import siga.artsoft.api.antecedenteescolar.AntecedenteEscolar;
@@ -11,6 +13,7 @@ import siga.artsoft.api.curso.Curso;
 import siga.artsoft.api.distrito.Distrito;
 import siga.artsoft.api.estadocivil.EstadoCivil;
 import siga.artsoft.api.nacionalidade.Nacionalidade;
+import siga.artsoft.api.provincia.Provincia;
 import siga.artsoft.api.sexo.Sexo;
 import siga.artsoft.api.situacaoacademica.SituacaoAcademica;
 import siga.artsoft.api.tipodocumentoidentificacao.TipoDocumentoIdentificacao;
@@ -31,6 +34,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of="id")
+@DynamicUpdate
 public class Estudante extends IdEntity {
 
     private long numero;
@@ -40,6 +44,7 @@ public class Estudante extends IdEntity {
     private String numeroDocumentoIdentificacao;
     @Column (name = "nome_completo")
     private String nomeCompleto;
+    private Long nuit;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "curso_id")
@@ -50,40 +55,48 @@ public class Estudante extends IdEntity {
     private LocalDateTime dataNascimento;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipo_documento_identificacao_id")
+    @JoinColumn(name = "tipodocumentoidentificacao_id")
+    @JsonIgnore
     private TipoDocumentoIdentificacao tipoDocumentoIdentificacao;
 
     @Column (name = "validade_documento_identificacao")
-    private LocalDateTime validadeDocumentoIDentificacao;
+    private LocalDateTime validadeDocumentoIdentificacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "estadocivil_id")
+    @JsonIgnore
     private EstadoCivil estadoCivil;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nacionalidade_id")
+    @JsonIgnore
     private Nacionalidade nacionalidade;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "distrito_id")
+    @JsonIgnore
     private Distrito distrito;
 
     private byte[] foto;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "curriculo_id")
+    @JsonIgnore
     private Curriculo curriculo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "viaingresso_id")
+    @JsonIgnore
     private ViaIngresso viaIngresso;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "situacaoacademica_id")
+    @JsonIgnore
     private SituacaoAcademica situacaoAcademica;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sexo_id")
+    @JsonIgnore
     private Sexo sexo;
 
     private String endereco;
@@ -100,6 +113,7 @@ public class Estudante extends IdEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "turno_id")
+    @JsonIgnore
     private Turno turno;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy="estudante", cascade=CascadeType.MERGE,orphanRemoval = true)
@@ -109,10 +123,18 @@ public class Estudante extends IdEntity {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @Fetch(FetchMode.JOIN)
     @JoinColumn(name = "user_id")
+    @JsonManagedReference
     private User userLogin;
 
     @Column(name = "fds", columnDefinition = "boolean default false")
     private boolean FDS;
 
     private boolean bolseiro;
+    @Column(name = "dados_actualizados")
+    private boolean dadosActualizados;
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "provincia_conclusao_ensino_medio")
+//    @JsonIgnore
+//    private Provincia ProvinciaConclusaoEnsinoMedio;
 }

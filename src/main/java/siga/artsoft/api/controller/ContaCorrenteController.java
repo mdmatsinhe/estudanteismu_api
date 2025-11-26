@@ -105,4 +105,14 @@ public class ContaCorrenteController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
         }
     }
+
+    @PostMapping("/verificarDividaTotal")
+    public ResponseEntity<DadosDividaEstudanteDTO> verificarDividaTotal(@RequestBody @Valid VerificarDividaDTO dados) {
+        try {
+            DadosDividaEstudanteDTO resultado = contaCorrenteService.verificarDividaTotalEstudante(dados.getIdEstudante());
+            return ResponseEntity.ok(resultado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build(); // Ou ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
 }

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import siga.artsoft.api.disciplinasemestre.DisciplinaSemestre;
@@ -68,26 +69,35 @@ public class PautaController {
 
     @PostMapping("/notas-disciplina")
     public ResponseEntity<?> listarNotasDisciplinas(@RequestBody PautaRequestDTO requestDTO) {
-        // Busca os objetos de estudante e disciplina pelos IDs fornecidos no DTO
-        Estudante estudante = estudanteService.findById(requestDTO.idEstudante())
-                .orElseThrow(() -> new IllegalArgumentException("Estudante não encontrado"));
-        DisciplinaSemestre disciplina = disciplinaSemestreService.findById(requestDTO.idDisciplina())
-                .orElseThrow(() -> new IllegalArgumentException("Disciplina não encontrada"));
-        var lista = pautaService.listarNotasByDisciplina(estudante, disciplina, requestDTO.anoLectivo(), requestDTO.semestre()).stream().map(DadosListagemNotas::new);
+        try {
+            Estudante estudante = estudanteService.findById(requestDTO.idEstudante())
+                    .orElseThrow(() -> new IllegalArgumentException("Estudante não encontrado"));
+            DisciplinaSemestre disciplina = disciplinaSemestreService.findById(requestDTO.idDisciplina())
+                    .orElseThrow(() -> new IllegalArgumentException("Disciplina não encontrada"));
 
-        // Chama o serviço passando os parâmetros corretos
-        return ResponseEntity.ok(lista);
+            var lista = pautaService.listarNotasByDisciplina(estudante, disciplina, requestDTO.anoLectivo(), requestDTO.semestre())
+                    .stream()
+                    .map(DadosListagemNotas::new);
+            return ResponseEntity.ok(lista);
+
+        } catch (PautaService.BloqueioNotasException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Erro interno no servidor ao processar a solicitação.");
+        }
     }
 
     @PostMapping("/disciplinas-recorrencia")
     public ResponseEntity<?> listarDisciplinasRecorrencia(@RequestBody PautaRequestDTO requestDTO) {
-        // Busca os objetos de estudante e disciplina pelos IDs fornecidos no DTO
         Estudante estudante = estudanteService.findById(requestDTO.idEstudante())
                 .orElseThrow(() -> new IllegalArgumentException("Estudante não encontrado"));
 
         var lista = pautaService.listarDisciplinasReprovadas(estudante,  requestDTO.anoLectivo(), requestDTO.semestre()).stream().map(DadosListagemNotas::new);
 
-        // Chama o serviço passando os parâmetros corretos
         return ResponseEntity.ok(lista);
     }
 

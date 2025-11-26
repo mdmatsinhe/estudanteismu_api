@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import siga.artsoft.api.distrito.Distrito;
 import siga.artsoft.api.distrito.DistritoService;
-import siga.artsoft.api.nacionalidade.Nacionalidade;
-import siga.artsoft.api.nacionalidade.NacionalidadeService;
 
 import java.util.List;
 

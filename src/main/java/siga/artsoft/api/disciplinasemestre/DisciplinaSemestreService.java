@@ -3,8 +3,7 @@ package siga.artsoft.api.disciplinasemestre;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import siga.artsoft.api.curriculo.Curriculo;
-import siga.artsoft.api.emolumento.Emolumento;
-import siga.artsoft.api.emolumento.EmolumentoRepository;
+import siga.artsoft.api.inscricao.InscricaoRepository;
 import siga.artsoft.api.pauta.PautaRepository;
 import siga.artsoft.api.precedencia.Precedencia;
 import siga.artsoft.api.precedencia.PrecedenciaRepository;
@@ -24,6 +23,9 @@ public class DisciplinaSemestreService {
 
     @Autowired
     private PrecedenciaRepository precedenciaRepository;
+
+    @Autowired
+    private InscricaoRepository inscricaoRepository;
 
     public Optional<DisciplinaSemestre> findById(long l) {
         return disciplinaSemestreRepository.findById(l);
@@ -51,7 +53,7 @@ public class DisciplinaSemestreService {
                     );
 
                     // Verifica se o estudante já se inscreveu na disciplina
-                    //  boolean inscrito = pautaRepository.existsByEstudanteIdAndDisciplinaId(estudanteId, disciplina.getDisciplina().getId());
+                  //  boolean inscrito = pautaRepository.existsByEstudanteIdAndDisciplinaId(estudanteId, disciplina.getDisciplina().getId());
 
                     // Adicionar disciplina apenas se não estiver aprovada e não já inscrita
                     if (!aprovado) {

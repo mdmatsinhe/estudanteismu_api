@@ -1,10 +1,8 @@
 package siga.artsoft.api.curriculo;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import siga.artsoft.api.curso.Curso;
-import siga.artsoft.api.disciplinasemestre.DisciplinaSemestre;
+import siga.artsoft.api.planoestudos.PlanoEstudos;
 import siga.artsoft.api.precedencia.Precedencia;
 import siga.artsoft.api.utils.IdEntity;
 
@@ -24,7 +22,7 @@ public class Curriculo extends IdEntity {
     private boolean activo;
 
     @OneToMany(mappedBy="curriculo", cascade= CascadeType.ALL,fetch = FetchType.LAZY, orphanRemoval = true)
-    List<DisciplinaSemestre> planoEstudos=new ArrayList<DisciplinaSemestre>();
+    List<PlanoEstudos> planoEstudos=new ArrayList<PlanoEstudos>();
 
     public int getAno_inicio() {
         return ano_inicio;
@@ -42,11 +40,11 @@ public class Curriculo extends IdEntity {
         this.ano_fim = ano_fim;
     }
 
-    public List<DisciplinaSemestre> getPlanoEstudos() {
+    public List<PlanoEstudos> getPlanoEstudos() {
         return planoEstudos;
     }
 
-    public void setPlanoEstudos(List<DisciplinaSemestre> planoEstudos) {
+    public void setPlanoEstudos(List<PlanoEstudos> planoEstudos) {
         this.planoEstudos = planoEstudos;
     }
 
@@ -105,10 +103,10 @@ public class Curriculo extends IdEntity {
         this.curso = curso;
     }
 
-    public void addPlanoEstudos(DisciplinaSemestre disciplina) {
-        disciplina.setCurriculo(this);
-        planoEstudos.add(disciplina);
-    }
+//    public void addPlanoEstudos(DisciplinaSemestre disciplina) {
+//        disciplina.setCurriculo(this);
+//        planoEstudos.add(disciplina);
+//    }
 
     public void addPrecedencia(Precedencia precedencia) {
         precedencia.setCurriculo(this);

@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import siga.artsoft.api.user.UserRepository;
 
+import java.util.Hashtable;
+
 @Service
 public class AutenticacaoService implements UserDetailsService {
 
@@ -16,4 +18,5 @@ public class AutenticacaoService implements UserDetailsService {
        public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
            return repository.findByUsername(username);
        }
+
 }

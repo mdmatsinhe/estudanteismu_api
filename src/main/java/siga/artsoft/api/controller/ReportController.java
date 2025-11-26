@@ -236,5 +236,42 @@ public class ReportController {
             return ResponseEntity.internalServerError().body(null);
         }
     }
+    @PostMapping("/boletim-candidatura")
+    public ResponseEntity<byte[]> gerarBoletimCandidatura(@RequestBody Map<String, Object> request) {
+        Logger logger = LoggerFactory.getLogger(ReportController.class);
+
+        try {
+            logger.debug("Início da geração do boletim de candidatura.");
+
+            // Extrai o ID do candidato
+            Long candidatoId = Long.parseLong(request.get("candidatoId").toString());
+
+            // Parâmetros do relatório
+            Map<String, Object> params = new HashMap<>();
+            params.put("PAR_LOGO", getClass().getClassLoader().getResourceAsStream("pics/Logotipo.jfif"));
+            params.put("PAR_CANDIDATOID", candidatoId);
+
+            // Geração do relatório
+            Connection connection = dataSource.getConnection();
+            byte[] pdf = jasperReportUtil.generateReport("/reports/candidaturaISMU.jrxml", params, connection);
+
+            if (pdf == null || pdf.length == 0) {
+                throw new IllegalStateException("O relatório gerado está vazio.");
+            }
+
+            logger.debug("Boletim de candidatura gerado com sucesso.");
+
+            // Retorno do relatório como PDF
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "boletim_candidatura.pdf");
+
+            return ResponseEntity.ok().headers(headers).body(pdf);
+        } catch (Exception e) {
+            logger.error("Erro ao gerar boletim de candidatura", e);
+            return ResponseEntity.internalServerError().body(null);
+        }
+    }
+
 
 }

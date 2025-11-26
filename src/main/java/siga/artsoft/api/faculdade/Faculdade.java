@@ -1,8 +1,8 @@
 package siga.artsoft.api.faculdade;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import siga.artsoft.api.delegacao.Delegacao;
@@ -14,7 +14,7 @@ import siga.artsoft.api.utils.IdEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Faculdade extends IdEntity {
-
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "delegacao")
     private Delegacao delegacao;

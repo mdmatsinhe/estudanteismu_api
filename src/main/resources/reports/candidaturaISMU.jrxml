@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="candidaturaISCIM" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2309322e-c311-4cc9-9214-da02f244fca8">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="MySQL Connection"/>
+	<parameter name="PAR_LOGO" class="java.io.InputStream"/>
+	<parameter name="PAR_CANDIDATOID" class="java.lang.Long"/>
+	<queryString language="SQL">
+		<![CDATA[Select 
+c.nome as nomeCandidato,
+c.apelido as apelidoCandidato,
+DATE(c.data_nascimento) as data_nascimento,
+c.nome_mae,
+c.nome_pai,
+c.numero_candidato,
+c.numero_doc,
+curso.nome as curso,
+d.nome as delegacao,
+f.nome as faculdade,
+n.nacionalidade,
+(case when n.id=1 then di.nome else 'ESTRANGEIRO ' end) as distrito,
+(case when n.id=1 then p.nome else 'ESTRANGEIRO ' end) as provincia,
+sexo.nome as sexo,
+tdi.nome as tipoDoc,
+turno.turno
+from candidatura c 
+INNER JOIN curso curso on c.curso_id=curso.id
+INNER JOIN delegacao d on c.delegacao_id=d.id
+INNER JOIN faculdade f on c.faculdade_id=f.id
+INNER JOIN nacionalidade n on c.nacionalidade_id=n.id
+Left JOIN distrito di on c.distrito_id=di.id
+Left JOIN provincia p on di.provincia_id=p.id
+INNER JOIN sexo sexo on c.sexo_id = sexo.id
+INNER JOIN tipodocumentoidentificacao tdi on c.tipo_doc_id = tdi.id
+INNER JOIN turno turno on c.turno_id=turno.id
+where c.id=$P{PAR_CANDIDATOID};]]>
+	</queryString>
+	<field name="nomeCandidato" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="nomeCandidato"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidatura"/>
+	</field>
+	<field name="apelidoCandidato" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="apelido"/>
+		<property name="com.jaspersoft.studio.field.label" value="apelidoCandidato"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidatura"/>
+	</field>
+	<field name="data_nascimento" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="data_nascimento"/>
+		<property name="com.jaspersoft.studio.field.label" value="data_nascimento"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidatura"/>
+	</field>
+	<field name="nome_mae" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome_mae"/>
+		<property name="com.jaspersoft.studio.field.label" value="nome_mae"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidatura"/>
+	</field>
+	<field name="nome_pai" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome_pai"/>
+		<property name="com.jaspersoft.studio.field.label" value="nome_pai"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidatura"/>
+	</field>
+	<field name="numero_candidato" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="numero_candidato"/>
+		<property name="com.jaspersoft.studio.field.label" value="numero_candidato"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidatura"/>
+	</field>
+	<field name="numero_doc" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="numero_doc"/>
+		<property name="com.jaspersoft.studio.field.label" value="numero_doc"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="candidatura"/>
+	</field>
+	<field name="curso" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="curso"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="curso"/>
+	</field>
+	<field name="delegacao" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="delegacao"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="delegacao"/>
+	</field>
+	<field name="faculdade" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="faculdade"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="faculdade"/>
+	</field>
+	<field name="nacionalidade" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nacionalidade"/>
+		<property name="com.jaspersoft.studio.field.label" value="nacionalidade"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="nacionalidade"/>
+	</field>
+	<field name="distrito" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="distrito"/>
+		<property name="com.jaspersoft.studio.field.label" value="distrito"/>
+	</field>
+	<field name="provincia" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="provincia"/>
+		<property name="com.jaspersoft.studio.field.label" value="provincia"/>
+	</field>
+	<field name="sexo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="sexo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="sexo"/>
+	</field>
+	<field name="tipoDoc" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="nome"/>
+		<property name="com.jaspersoft.studio.field.label" value="tipoDoc"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="tipodocumentoidentificacao"/>
+	</field>
+	<field name="turno" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="turno"/>
+		<property name="com.jaspersoft.studio.field.label" value="turno"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="turno"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="133" splitType="Stretch">
+			<staticText>
+				<reportElement x="80" y="111" width="400" height="20" uuid="88b6df25-5e1b-4739-9cab-ec12a6037041"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[COMPROVATIVO DA CANDIDATURA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="80" y="87" width="400" height="20" uuid="c4061297-8688-498e-96ed-863cd50a01eb"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[INSTITUTO SUPERIOR MUTASA]]></text>
+			</staticText>
+			<image>
+				<reportElement x="240" y="0" width="86" height="81" uuid="36ea1431-1dfc-4f25-81ab-4bc3ab276d2b"/>
+				<imageExpression><![CDATA[$P{PAR_LOGO}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<summary>
+		<band height="623" splitType="Stretch">
+			<textField>
+				<reportElement x="219" y="35" width="204" height="14" uuid="527903c7-39ec-4068-bbde-3bdc214dbfa0">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nomeCandidato}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="163" y="35" width="50" height="14" uuid="e91aeb9c-0008-4c9a-8e49-903730899fe0"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nome:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="470" y="35" width="88" height="14" uuid="62477cde-f611-4f31-970d-5f5258d1d8b7"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{apelidoCandidato}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="414" y="35" width="50" height="14" uuid="b19075d3-7f4e-4c9a-970b-6cddf6842385"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Apelido:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="219" y="55" width="146" height="14" uuid="91f58e9e-6210-4d04-aa07-5b1691b9e70f"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{data_nascimento}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="163" y="55" width="56" height="14" uuid="54f97cf9-c4ce-400e-9fce-3357a90e0112"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Data Nasc.:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="79" y="35" width="64" height="14" uuid="48a700e5-b0ff-416e-b760-5cf1b206491a"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero_candidato}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="35" width="78" height="14" uuid="3b9f078c-ff3d-4014-ac48-580116d972d9"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº do Candidato:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="79" y="55" width="84" height="14" uuid="41404c29-908a-4b95-bfbd-7ae0cb9c893d"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sexo}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="55" width="78" height="14" uuid="30a0426e-bc76-4c50-a963-99dbbb5cbbc3"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Género:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="470" y="55" width="88" height="14" uuid="2136fae9-13de-4eef-a760-b6cd906e3e78"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{numero_doc}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="355" y="55" width="108" height="14" uuid="0de15ae8-edce-4af1-9c4a-df97ab1af5f4"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nº do Documento:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="82" y="136" width="476" height="14" uuid="e1245b33-f681-470c-a2a4-0f84394e9275">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nome_pai}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="136" width="78" height="14" uuid="7ffb52f4-97a6-4d40-abe7-9529e53b25dc">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nome do Pai:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="82" y="156" width="476" height="14" uuid="120ed64f-3609-4434-85d6-45dd9358ed97">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nome_mae}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="156" width="78" height="14" uuid="f53feeff-ecb3-42b6-8429-86ab97ec251a">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nome da Mãe:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="219" y="77" width="146" height="14" uuid="20abce32-2401-4d22-9eef-4d3918340577"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{provincia}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="163" y="77" width="56" height="14" uuid="926ee262-aaa0-4467-ae96-e3a537a6b042"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Província:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="79" y="77" width="84" height="14" uuid="6802a7d6-305a-4ede-8dde-9b9cc420b54b"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{nacionalidade}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="77" width="78" height="14" uuid="54a938bb-90a3-4e2f-9b9d-b03137382b7d"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Nacionalidade:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="470" y="77" width="88" height="14" uuid="99e3c99c-05dc-4f73-9e9e-6bea2463d025"/>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{distrito}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="355" y="77" width="108" height="14" uuid="e8145260-8249-453d-aea9-9ed9b31d19c7"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Distrito:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="259" y="252" width="298" height="14" uuid="c91ee3d7-58b6-4f0b-a07d-a9919b193908">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{curso}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="219" y="252" width="40" height="14" uuid="83b9ed0d-9463-4ae0-b2e3-a9c9edc22fdc">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Curso:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="79" y="211" width="478" height="14" uuid="b6af8596-8649-4cf1-bd04-36c7762ce2cc">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{faculdade}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="211" width="78" height="14" uuid="0bd8cb33-536a-40ae-b362-5969e6ff20fd">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Instituição:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="80" y="231" width="477" height="14" uuid="e81f77da-7ea8-493e-8f5c-bf28ddee295c">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{delegacao}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="231" width="78" height="14" uuid="7a1b2868-4fbe-4821-ac2e-d8a4f9346732">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Delegação:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="79" y="252" width="133" height="14" uuid="7ef8a14d-e431-4846-8ca7-744c16773fdc">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<box>
+					<pen lineWidth="0.5" lineStyle="Dotted" lineColor="rgba(0, 0, 0, 0.12156863)"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{turno}.toUpperCase()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="2" y="252" width="78" height="14" uuid="2d66f2ef-9293-4102-b10e-77ba4e63fbc9">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Turno:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="11" width="556" height="20" forecolor="#000000" backcolor="rgba(158, 158, 158, 0.52156866)" uuid="f4d5a6c4-f108-4480-a4b7-1377e6629d45"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[  DADOS PESSOAIS:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="110" width="556" height="20" forecolor="#000000" backcolor="rgba(158, 158, 158, 0.52156866)" uuid="c4167e78-298c-4235-a0ee-e964f3119d53"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[  FILIAÇÃO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="2" y="187" width="556" height="20" forecolor="#000000" backcolor="rgba(158, 158, 158, 0.52156866)" uuid="9a81bb84-4483-4676-8697-fd1b0e49c9bc"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[  CURSO E INSTITUICÃO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="279" width="555" height="84" uuid="49f9c1a7-ed4d-40b1-a958-bccd54dcfa0b"/>
+				<textElement textAlignment="Justified">
+					<font fontName="Times New Roman" size="11"/>
+				</textElement>
+				<text><![CDATA[Caro(a) candidato(a),
+
+Agradecemos por efetuar a sua candidatura ao Instituto Superior Mutasa (ISMU).
+Pedimos que se dirija à instituição para a validação e entrega dos documentos necessários para concluir o processo de inscrição.
+Guarde cuidadosamente este boletim — ele serve como comprovativo oficial da sua candidatura.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="370" width="556" height="20" forecolor="#000000" backcolor="rgba(158, 158, 158, 0.52156866)" uuid="68056b2a-c7e0-45fc-bcb6-6a94374cf977"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[  DOCUMENTOS NECESSÁRIOS:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="390" width="556" height="86" uuid="e222a47b-b325-41f6-9f92-65ef07e07738"/>
+				<textElement>
+					<font fontName="Times New Roman"/>
+				</textElement>
+				<text><![CDATA[ Requisitos: 
+ Fotocopia autenticada do B.I ou Passaporte
+ Duas Fotos tipo Passe
+ Processo Individual
+ Fotocopia autenticada do Certificado da 12ª Classe ou equivalente
+ Fotocopia de Nuit]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1" y="476" width="556" height="20" forecolor="#000000" backcolor="rgba(158, 158, 158, 0.52156866)" uuid="a5c09df4-b788-41b8-ab5e-8dcf47324457"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Times New Roman" isBold="true"/>
+				</textElement>
+				<text><![CDATA[📍 CONTACOTS E ENDEREÇO:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="2" y="496" width="257" height="122" uuid="42be2108-c0a4-4381-b9f8-2aab771fd647"/>
+				<textElement>
+					<font fontName="Times New Roman"/>
+					<paragraph lineSpacingSize="1.5"/>
+				</textElement>
+				<text><![CDATA[
+Para mais informações:
+• Call Center: 840972190
+• Chamada normal: 879309100
+WEBSITE:
+• www.ismu-mutasa.co.mz
+• geral@ismu-mutasa.co.mz
+]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="270" y="496" width="257" height="122" uuid="bc82322b-b6c3-45a8-9caa-d1da5fcd0f3e"/>
+				<textElement>
+					<font fontName="Times New Roman"/>
+					<paragraph lineSpacingSize="1.5"/>
+				</textElement>
+				<text><![CDATA[
+Endereço:
+o Rua da Resistência, № 326
+o Av. Ho chi min, № 780 Maputo - Moçambique]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

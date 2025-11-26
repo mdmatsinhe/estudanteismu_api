@@ -3,10 +3,12 @@ package siga.artsoft.api.disciplinasemestre;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 import siga.artsoft.api.curriculo.Curriculo;
 
 import java.util.List;
 
+@Repository
 public interface DisciplinaSemestreRepository extends JpaRepository<DisciplinaSemestre,Long> {
 
     @Query("SELECT d FROM DisciplinaSemestre d " +

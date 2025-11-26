@@ -1,6 +1,9 @@
 package siga.artsoft.api.user;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -11,8 +14,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import siga.artsoft.api.utils.IdEntity;
 
-import java.security.Permission;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 
 @Table(name="users")
 @Entity(name="User")

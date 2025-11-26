@@ -1,6 +1,9 @@
 package siga.artsoft.api.disciplinasemestre;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import siga.artsoft.api.anocurso.AnoCurso;
 import siga.artsoft.api.curriculo.Curriculo;
 import siga.artsoft.api.disciplina.Disciplina;
@@ -10,6 +13,9 @@ import siga.artsoft.api.utils.IdEntity;
 
 @Table(name="planoestudos")
 @Entity(name="DisciplinaSemestre")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DisciplinaSemestre extends IdEntity {
 
     private static final long serialVersionUID = 8741355248630718268L;

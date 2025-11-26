@@ -115,10 +115,7 @@ public class ContaCorrente extends IdEntity {
         dataActual.setTime(new Date());
         String tipoemolumento = "0";
         String valor = "";
-        /*
-         * if (eml.getId().toString().length() < 2) { tipoemolumento = tipoemolumento +
-         * eml.getId(); } else { tipoemolumento = eml.getId().toString(); }
-         */
+
         System.out.println(estudante.getId() + " tipo emolumento " + tipoemolumento + " ");
         String ano_lectivo = this.getAnoLectivo() + "";
         System.out.println(ano_lectivo + "XXX");
