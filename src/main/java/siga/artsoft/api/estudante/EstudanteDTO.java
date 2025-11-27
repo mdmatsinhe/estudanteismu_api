@@ -29,7 +29,6 @@ public class EstudanteDTO {
     private String endereco;
     private Long nuit;
     private boolean bolseiro;
-    private boolean dadosActualizados;
 
     // Construtor vazio para uso com bibliotecas de serialização/deserialização (ex: Jackson)
     public EstudanteDTO() {}

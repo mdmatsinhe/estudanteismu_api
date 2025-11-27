@@ -24,7 +24,7 @@ public class IdEntity implements Serializable, Entity {
     protected Long id;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created", nullable = false)
+    @Column(name = "created", nullable = false, updatable = false)
     private Date created;
 
     @Temporal(TemporalType.TIMESTAMP)

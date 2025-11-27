@@ -189,8 +189,6 @@ public class EstudanteService {
         estudante.setApelido(dto.getApelido());
         estudante.setEmail(dto.getEmail());
         estudante.setNumeroDocumentoIdentificacao(dto.getNumeroDocumentoIdentificacao());
-        estudante.setDadosActualizados(true);
-
         // Telefone
         if (dto.getTelefone() != null && !dto.getTelefone().isBlank()) {
             estudante.setTelefone(Long.parseLong(dto.getTelefone()));
@@ -232,12 +230,16 @@ public class EstudanteService {
         }
 
         // Provincia
-//        Provincia provincia = provinciaRepository.findById(dto.getProvinciaConclusaoEnsinoMedioId())
-//                .orElseThrow(() -> new RuntimeException("Provincia não encontrada com ID: " + dto.getProvinciaConclusaoEnsinoMedioId()));
-//        estudante.setProvinciaConclusaoEnsinoMedio(provincia);
+        Provincia provincia = provinciaRepository.findById(dto.getProvinciaConclusaoEnsinoMedioId())
+                .orElseThrow(() -> new RuntimeException("Provincia não encontrada com ID: " + dto.getProvinciaConclusaoEnsinoMedioId()));
+        estudante.setProvinciaConclusaoEnsinoMedio(provincia);
 
-        // Salvar e retornar
-        return estudanteRepository.save(estudante);
+        Estudante estudanteSalvo = estudanteRepository.save(estudante);
+
+        // CHAMA A ATUALIZAÇÃO NATIVA
+        estudanteRepository.atualizarDadosActualizadosNativo(estudanteSalvo.getId());
+
+        return estudanteSalvo;
     }
 
 

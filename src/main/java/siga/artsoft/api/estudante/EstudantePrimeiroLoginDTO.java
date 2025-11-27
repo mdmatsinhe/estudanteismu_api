@@ -62,8 +62,7 @@ public class EstudantePrimeiroLoginDTO {
     @JsonProperty("distritoId") // camelCase do front
     private Long distritoId;
 
-    // Se futuramente quiser adicionar a província, descomente:
-    // @NotNull(message = "A provincia de Conclusao do Ensino Médio é obrigatório.")
-    // @JsonProperty("provinciaConclusaoEnsinoMedio")
-    // private Long provinciaConclusaoEnsinoMedioId;
+     @NotNull(message = "A provincia de Conclusao do Ensino Médio é obrigatório.")
+     @JsonProperty("provinciaConclusaoEnsinoMedioId")
+     private Long provinciaConclusaoEnsinoMedioId;
 }

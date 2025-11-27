@@ -34,7 +34,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(of="id")
-@DynamicUpdate
 public class Estudante extends IdEntity {
 
     private long numero;
@@ -42,7 +41,7 @@ public class Estudante extends IdEntity {
     private String nome;
     @Column(name = "numero_documento_identificacao")
     private String numeroDocumentoIdentificacao;
-    @Column (name = "nome_completo")
+    @Column (name = "nome_completo", insertable = false, updatable = false)
     private String nomeCompleto;
     private Long nuit;
 
@@ -55,7 +54,7 @@ public class Estudante extends IdEntity {
     private LocalDateTime dataNascimento;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tipodocumentoidentificacao_id")
+    @JoinColumn(name = "tipo_documento_identificacao_id")
     @JsonIgnore
     private TipoDocumentoIdentificacao tipoDocumentoIdentificacao;
 
@@ -130,11 +129,12 @@ public class Estudante extends IdEntity {
     private boolean FDS;
 
     private boolean bolseiro;
-    @Column(name = "dados_actualizados")
+
+    @Column(name = "dados_actualizados", nullable = false)
     private boolean dadosActualizados;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "provincia_conclusao_ensino_medio")
-//    @JsonIgnore
-//    private Provincia ProvinciaConclusaoEnsinoMedio;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provincia_conclusao_ensino_medio")
+    @JsonIgnore
+    private Provincia provinciaConclusaoEnsinoMedio;
 }
