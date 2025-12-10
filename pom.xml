@@ -116,7 +116,15 @@
 			<artifactId>java-jwt</artifactId>
 			<version>4.4.0</version>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.vodacom.mpesa</groupId>
+            <artifactId>portal-sdk</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/lib/portal-sdk.jar</systemPath>
+        </dependency>
+
+    </dependencies>
 
     <build>
         <resources>

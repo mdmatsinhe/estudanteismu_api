@@ -109,6 +109,13 @@ public class ContaCorrente extends IdEntity {
 
     private String referencia;
 
+    @Column(name = "data_registo")
+    private Date dataRegisto;
+
+    private String referenciaMpesa;
+
+    private String telefonePagamento;
+
     @SuppressWarnings("deprecation")
     public void setReferenciaParcialOT(Estudante estudante, TipoEmolumento eml, Date mes, BigDecimal saldo) {
         GregorianCalendar dataActual = new GregorianCalendar();

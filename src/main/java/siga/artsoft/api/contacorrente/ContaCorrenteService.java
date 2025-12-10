@@ -11,6 +11,8 @@ import siga.artsoft.api.estudante.Estudante;
 import siga.artsoft.api.estudante.EstudanteRepository;
 import siga.artsoft.api.inscricao.Inscricao;
 import siga.artsoft.api.inscricao.InscricaoRequest;
+import siga.artsoft.api.mpesa.MpesaC2BService;
+import siga.artsoft.api.mpesa.MpesaPushResponse;
 import siga.artsoft.api.pauta.Pauta;
 import siga.artsoft.api.emolumento.EmolumentoService;
 import siga.artsoft.api.sessaoturma.SessaoTurma;
@@ -21,6 +23,7 @@ import siga.artsoft.api.user.UserRepository;
 import siga.artsoft.api.utils.TipoEmolumentoSelecionado;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -50,6 +53,10 @@ public class ContaCorrenteService {
 
     @Autowired
     private DisciplinaSemestreService disciplinaSemestreService;
+
+    @Autowired
+    private MpesaC2BService mpesaC2BService;
+
 
     @Transactional
     public ContaCorrente gerarReferencia(Optional<Estudante> estudanteParam, Optional<Pauta> pautaParam, Optional<User> userParam, int anoLectivo, int semestre) {
@@ -451,11 +458,28 @@ public class ContaCorrenteService {
 
         Date dataAtual = new Date();
 
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        Date dataAtualSemHora = cal.getTime();
+
         List<ContaCorrente> dividasAtivas = transacoes.stream()
                 .filter(transacao -> {
                     // Condição 1: A data limite de pagamento já passou (data_limite_pagamento < CURDATE())
-                    boolean dataLimiteVencida = transacao.getDataLimitePagamento() != null &&
-                            (transacao.getDataLimitePagamento().before(dataAtual));
+                    boolean dataLimiteVencida = false;
+                    if (transacao.getDataLimitePagamento() != null) {
+                        Calendar calLimite = Calendar.getInstance();
+                        calLimite.setTime(transacao.getDataLimitePagamento());
+                        calLimite.set(Calendar.HOUR_OF_DAY, 0);
+                        calLimite.set(Calendar.MINUTE, 0);
+                        calLimite.set(Calendar.SECOND, 0);
+                        calLimite.set(Calendar.MILLISECOND, 0);
+
+                        dataLimiteVencida = calLimite.getTime().before(dataAtualSemHora);
+                    }
 
                     // Condição 2: O valor não foi pago
                     boolean temSaldoDevedor = transacao.getTotalDebito() != null &&
@@ -465,8 +489,7 @@ public class ContaCorrenteService {
                     boolean situacaoValida = transacao.getSituacao() != null &&
                             !transacao.getSituacao().equalsIgnoreCase("CANCELADO") &&
                             !transacao.getSituacao().equalsIgnoreCase("CANCELADA") &&
-                            !transacao.getSituacao().equalsIgnoreCase("NEGOCIADA") &&
-                            !transacao.getSituacao().equalsIgnoreCase("PARCIAL");
+                            !transacao.getSituacao().equalsIgnoreCase("NEGOCIADA");
 
                     // Condição 4: A taxa de desconto NÃO é 100%
                     boolean naoTemDescontoTotal = transacao.getTaxaDesconto() < 100;
@@ -573,6 +596,123 @@ public class ContaCorrenteService {
         }
 
         return selecionado;
+    }
+
+    @Transactional
+    public MpesaPushResponse iniciarPagamentoMpesa(Long contaId, String msisdn) {
+        ContaCorrente conta = contaCorrenteRepository.findById(contaId)
+                .orElseThrow(() -> new IllegalArgumentException("ContaCorrente não encontrada."));
+
+        if (conta.isPago()) {
+            throw new IllegalStateException("Pagamento já realizado para esta transação.");
+        }
+
+        BigDecimal valorAPagar = conta.getTotalDebito(); // Valor obrigatório
+
+        String thirdPartyReference = "TP" + contaId;
+        String msisdnFormatado = formatarNumeroMpesa(msisdn);
+
+        // Chama o serviço de push M-Pesa
+        MpesaPushResponse pushResponse = mpesaC2BService.enviarSTKPush(
+                msisdnFormatado,
+                valorAPagar.toPlainString(),
+                conta.getReferencia(),
+                thirdPartyReference
+        );
+        // Armazena ThirdPartyReference na transação para identificar o callback
+        conta.setReferenciaMpesa(thirdPartyReference);
+        conta.setTelefonePagamento(msisdn);
+
+        User user = userRepository.findById(1L)
+                .orElseThrow(() -> new IllegalStateException("Usuário padrão não encontrado."));
+
+        String transactionId = pushResponse.getTransactionId();
+        // Atualiza todos os campos
+        conta.setNumeroTalao(transactionId);
+        conta.setDataPagamento(new Date());
+        conta.setMeioPagamento("API-M-PESA");
+        conta.setNumeroConta("871072194");
+        conta.setValorDepositado(valorAPagar);
+        conta.setCredito(valorAPagar);
+        conta.setPago(true);
+        conta.setBanco("M-PESA");
+        conta.setSituacao("OK");
+        conta.setUpdatedBy(user);
+        conta.setUser(user);
+        conta.setDataRegisto(new Date());
+
+        contaCorrenteRepository.save(conta);
+
+        return pushResponse;
+    }
+
+    @Transactional
+    public void confirmarPagamentoMpesa(String thirdPartyReference, String transactionId, BigDecimal valorPago, Optional<User> userParam) {
+        ContaCorrente conta = contaCorrenteRepository.findByReferenciaMpesa(thirdPartyReference);
+        User user = userParam.orElseGet(() -> userRepository.findById(1L)
+                .orElseThrow(() -> new IllegalStateException("Usuário padrão não encontrado.")));
+
+
+        if (conta == null) {
+            throw new IllegalArgumentException("Transação não encontrada para o ThirdPartyReference: " + thirdPartyReference);
+        }
+
+        if (conta.isPago()) {
+            return; // Já processada
+        }
+
+        // Valor deve ser exatamente o total_debito
+        if (valorPago.compareTo(conta.getTotalDebito()) != 0) {
+            throw new IllegalStateException("O valor pago não corresponde ao valor devido.");
+        }
+
+        // Atualiza todos os campos
+        conta.setNumeroTalao(transactionId);
+        conta.setDataPagamento(new Date());
+        conta.setMeioPagamento("API-M-PESA");
+        conta.setNumeroConta("871072194");
+        conta.setValorDepositado(valorPago);
+        conta.setCredito(valorPago);
+        conta.setPago(true);
+        conta.setBanco("M-PESA");
+        conta.setSituacao("OK");
+        conta.setUpdatedBy(user);
+        conta.setUser(user);
+        conta.setDataRegisto(new Date());
+
+        contaCorrenteRepository.save(conta);
+    }
+
+    public String formatarNumeroMpesa(String numero) {
+        if (numero == null || numero.isEmpty()) {
+            throw new IllegalArgumentException("Número M-Pesa inválido");
+        }
+
+        // Remove tudo que não for dígito
+        numero = numero.replaceAll("\\D", "");
+
+        // Se já tiver 12 dígitos e começar com 258, assume que está correto
+        if (numero.length() == 12 && numero.startsWith("258")) {
+            numero = numero.substring(3); // pega só os 9 dígitos para validação
+        } else if (numero.length() == 9) {
+            // número local, já está ok
+        } else if (numero.length() == 10 && numero.startsWith("0")) {
+            numero = numero.substring(1); // remove o 0 inicial
+        } else {
+            throw new IllegalArgumentException("Número M-Pesa inválido ou incompleto: " + numero);
+        }
+
+        // Validação prefixos Vodacom: 84, 85
+        String prefixo = numero.substring(0, 2);
+        if (!prefixo.equals("84") && !prefixo.equals("85")) {
+            throw new IllegalArgumentException("Número inválido. Só são aceitos números Vodacom em Moçambique (84, 85).");
+        }
+
+        // Adiciona o código do país
+        return "258" + numero;
+    }
+    public Optional<ContaCorrente> getContaPorReferencia(String thirdPartyReference) {
+        return Optional.ofNullable(contaCorrenteRepository.findByReferenciaMpesa(thirdPartyReference));
     }
 
 }

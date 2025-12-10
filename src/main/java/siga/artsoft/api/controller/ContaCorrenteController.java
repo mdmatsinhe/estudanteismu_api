@@ -31,7 +31,6 @@ public class ContaCorrenteController {
     @Autowired
     private ContaCorrenteService contaCorrenteService;
 
-
     @Autowired
     private EstudanteService estudanteService;
 
@@ -112,7 +111,7 @@ public class ContaCorrenteController {
             DadosDividaEstudanteDTO resultado = contaCorrenteService.verificarDividaTotalEstudante(dados.getIdEstudante());
             return ResponseEntity.ok(resultado);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build(); // Ou ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+            return ResponseEntity.badRequest().build();
         }
     }
 }

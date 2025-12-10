@@ -48,9 +48,18 @@ public interface PautaRepository extends JpaRepository<Pauta, Long> {
     List<Pauta> findByEstudanteAndDisciplinaAndAnoLectivoAndSemestreAndNotaExameNormalLessThanAndGradedExameNormalTrueAndPublicadoExameNormalTrue(
             Estudante estudante, int anoLectivo, int semestre, double nota);
 
+//    @Query("""
+//            select p from Pauta p
+//            where p.estudante = ?1 and p.disciplina = ?2 and p.anoLectivo = ?3 and p.semestre = ?4""")
     @Query("""
-            select p from Pauta p
-            where p.estudante = ?1 and p.disciplina = ?2 and p.anoLectivo = ?3 and p.semestre = ?4""")
+        SELECT p FROM Pauta p
+        WHERE p.id IN (
+            SELECT MAX(p2.id) FROM Pauta p2
+            WHERE p2.estudante = ?1
+            AND p2.disciplina = ?2
+            AND p2.anoLectivo = ?3
+            AND p2.semestre = ?4
+        )""")
     List<Pauta> findByEstudanteAndDisciplinaAndAnoLectivoAndSemestre(
             Estudante estudante, DisciplinaSemestre disciplina, int anoLectivo, int semestre);
 

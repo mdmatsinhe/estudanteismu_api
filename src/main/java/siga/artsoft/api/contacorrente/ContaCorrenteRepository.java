@@ -35,4 +35,6 @@ public interface ContaCorrenteRepository extends JpaRepository<ContaCorrente,Lon
     ContaCorrente findByEstudanteAndTipoEmolumento(Estudante estudante, String tipoEmolumento);
 
     List<ContaCorrente> findByEstudante(Estudante estudante);
+
+    ContaCorrente findByReferenciaMpesa(String thirdPartyReference);
 }
